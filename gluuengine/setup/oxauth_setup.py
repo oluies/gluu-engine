@@ -63,6 +63,7 @@ class OxauthSetup(OxSetup):
         )
 
         self.pull_oxauth_override()
+        self.pull_java_keystore()
         self.add_auto_startup_entry()
         self.change_cert_access("tomcat", "tomcat")
         self.reload_supervisor()
@@ -111,3 +112,34 @@ class OxauthSetup(OxSetup):
             dest = "{}:/var/gluu/webapps/oxauth".format(self.node.name)
             self.logger.info("copying {} to {} recursively".format(src, dest))
             self.machine.scp(src, dest, recursive=True)
+
+    # hotfix to copy and distribute jks to oxAuth container
+    # TODO: remove this once oxEleven is introduced
+    def pull_java_keystore(self):
+        if not os.path.exists(self.app.config["KEYSTORE_DIR"]):
+            os.makedirs(self.app.config["KEYSTORE_DIR"])
+
+        for jks in ("oxauth-keys.jks", "scim-rp.jks", "scim-rs.jks",):
+            # jks in control host
+            local_jks = "{}/{}".format(self.app.config["KEYSTORE_DIR"], jks)
+
+            # jks in container
+            remote_jks = "/etc/certs/{}".format(jks)
+
+            if not os.path.exists(local_jks):
+                try:
+                    with self.app.app_context():
+                        ldap = self.cluster.get_containers("ldap")[0]
+                except IndexError:
+                    self.logger.warn("unable to find any ldap container "
+                                     "to pull keystores from")
+                    return
+                else:
+                    self.docker.copy_from_container(
+                        ldap.cid, remote_jks, local_jks,
+                    )
+
+            self.logger.info("pulling {} keystore".format(jks))
+            self.docker.copy_to_container(
+                self.container.cid, local_jks, remote_jks,
+            )

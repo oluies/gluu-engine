@@ -61,6 +61,8 @@ class Config(object):
     GLUU_IMAGE_TAG = os.environ.get("GLUU_IMAGE_TAG", "latest")
     ENABLE_LICENSE = True
 
+    KEYSTORE_DIR = os.path.join(DATA_DIR, "keystore")
+
 
 class ProdConfig(Config):
     """Production configuration.
