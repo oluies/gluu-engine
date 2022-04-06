@@ -1,4 +1,4 @@
-Flask==0.10.1
+Flask==0.12.3
 flask-restful==0.3.1
 crochet==1.4.0
 docker-py==1.8.0
@@ -13,3 +13,4 @@ click==6.6
 flask-dataset==0.1.2
 PyMySQL==0.7.9
 schematics==1.1.1
+twisted>=22.1.0 # not directly required, pinned by Snyk to avoid a vulnerability
