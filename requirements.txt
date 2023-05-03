@@ -1,4 +1,4 @@
-Flask==0.10.1
+Flask==2.2.5
 flask-restful==0.3.1
 crochet==1.4.0
 docker-py==1.8.0
